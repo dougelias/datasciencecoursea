@@ -1,0 +1,74 @@
+require(stringr)    # for str_c
+
+complete <- function(directory, id = 1:332) {
+    
+        ## 'directory' is a character vector of length 1 indicating
+        ## the location of the CSV files
+    
+    
+    if (!is.null(directory)) {
+        tc_result = tryCatch(setwd(directory))
+        if ( getwd() != directory) {
+            stop(cat("Could not setwd to ", directory,'(', result,')'));
+        }
+    }
+    else {
+        stop("Please provide a directory within which the CSV files can be found");
+    }
+        ## 'id' is an integer vector indicating the monitor ID numbers
+        ## to be used
+        
+        ## Return a data frame of the form:
+        ## id nobs
+        ## 1  117
+        ## 2  1041
+        ## ...
+        ## where 'id' is the monitor ID number and 'nobs' is the
+        ## number of complete cases
+            
+    record = list (
+        id = c(),
+        nobs = c()
+        )
+    
+    for (idx in id) {
+        ##
+        ## Test for existence of datafile
+        ##
+
+        datafile = str <- c(as.character(idx),".csv")
+
+        cat("Checking -- ",datafile)
+        
+        if (file.exists(datafile)) {
+            
+            
+        ##
+        ## open and slurp all the records
+        ##
+            cat(" Reading data ")
+            data = read.csv(datafile)
+            
+        ## determine the number of
+        ## 'complete' cases --
+        ## a 'complete case' is assumed to
+        ## be one without any NAs
+        ##
+            nobs = 0
+
+            for (datum in data) {
+                if (!anyNA(datum)) {
+                    nobs = nobs+1
+                }
+            }
+
+            record$id = c(record$id, data[1]$ID)
+            record$nobs = c(record$nobs,nobs)
+
+            cat(as.character(nobs), " complete observations ")
+            cat()
+        }
+    }
+    return(as.data.frame(record))
+}
+
